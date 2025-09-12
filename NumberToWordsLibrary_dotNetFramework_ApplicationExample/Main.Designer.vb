@@ -61,7 +61,7 @@ Partial Class Main
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
         Me.TabPage1.Size = New System.Drawing.Size(768, 400)
         Me.TabPage1.TabIndex = 0
-        Me.TabPage1.Text = "Number Conversion Tester"
+        Me.TabPage1.Text = "Amount Conversion Tester"
         Me.TabPage1.UseVisualStyleBackColor = True
         '
         'lblResults
@@ -116,9 +116,9 @@ Partial Class Main
         Me.Label1.AutoSize = True
         Me.Label1.Location = New System.Drawing.Point(6, 26)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(98, 13)
+        Me.Label1.Size = New System.Drawing.Size(97, 13)
         Me.Label1.TabIndex = 0
-        Me.Label1.Text = "Number to convert:"
+        Me.Label1.Text = "Amount to convert:"
         '
         'TabPage2
         '
@@ -159,7 +159,7 @@ Partial Class Main
         Me.ClientSize = New System.Drawing.Size(800, 450)
         Me.Controls.Add(Me.TabControl1)
         Me.Name = "Main"
-        Me.Text = "Number To Words Converter Tester - .NET Framework 4.72 or higher"
+        Me.Text = "Amount to Words Converter Tester - .NET Framework 4.72 or higher"
         Me.TabControl1.ResumeLayout(False)
         Me.TabPage1.ResumeLayout(False)
         Me.TabPage1.PerformLayout()

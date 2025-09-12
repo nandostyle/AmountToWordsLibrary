@@ -1,10 +1,8 @@
-# NumberToWordConverter
-
-NumberToWordConverter
+# AmountToWordConverter
 
 ### A static utility class to convert numbers to words in multiple languages and currencies.
 
-A self-contained C#/.NET 6 or .NET Framework 4.7.2 class library designed for easy integration into any .NET application, including those using VB.NET. It converts a decimal number into its word representation, handling multiple languages and currency formats.
+A self-contained C#/.NET 6 or .NET Framework 4.7.2 class library designed for easy integration into any .NET application, including those using VB.NET. It converts an amount (represented by two decimal numbers) into its word representation, handling multiple languages and currency formats.
 
 > **Note:** The code is designed to be easily adaptable to almost any .NET Framework or .NET version.
 
@@ -67,5 +65,5 @@ We welcome improvements and contributions! If you find a bug or have a suggestio
 ---
 
 ### Support
-If you find this project helpful and would like to support its continued development, you can make a donation via PayPal.
+If you find this project helpful and would like to support its continued development, you can donate via PayPal.
 PayPal: nandostyle@gmail.com

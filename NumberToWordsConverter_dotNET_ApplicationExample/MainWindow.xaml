@@ -1,0 +1,137 @@
+﻿<Window
+    x:Class="NumberToWordsConverter_ApplicationExample.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Number To Words Converter Tester - .NET 6.0 or higher"
+    Width="800"
+    Height="500"
+    mc:Ignorable="d">
+    <TabControl Margin="10" Padding="3">
+        <TabItem Header="Number To Words Converter">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel
+                    Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Margin="5"
+                        VerticalAlignment="Center"
+                        FontWeight="Bold"
+                        Text="Enter a number:" />
+                    <TextBox
+                        x:Name="InputNumberTextBox"
+                        Width="250"
+                        Margin="5"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Text="12345.67" />
+                    <ComboBox
+                        x:Name="LanguageComboBox"
+                        Width="120"
+                        Margin="5"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        SelectedIndex="0">
+                        <ComboBoxItem Content="English" />
+                        <ComboBoxItem Content="Spanish" />
+                    </ComboBox>
+                    <ComboBox
+                        x:Name="CurrencyComboBox"
+                        Width="120"
+                        Margin="5"
+                        HorizontalContentAlignment="Center"
+                        SelectedIndex="0">
+                        <ComboBoxItem Content="Dollars" />
+                        <ComboBoxItem Content="Pesos" />
+                    </ComboBox>
+                    <Button
+                        x:Name="TestsButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Background="#FF007ACC"
+                        Click="TestsButton_Click"
+                        Content="Run Test"
+                        FontWeight="Bold"
+                        Foreground="White" />
+                </StackPanel>
+                <TextBox
+                    x:Name="ResultsTextBox"
+                    Grid.Row="2"
+                    Height="Auto"
+                    Margin="5"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    FontFamily="Consolas"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    IsReadOnly="True"
+                    TextWrapping="Wrap"
+                    VerticalScrollBarVisibility="Auto" />
+
+            </Grid>
+        </TabItem>
+        <TabItem Header="Tests">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel
+                    Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+                    <ComboBox
+                        x:Name="AllTestsLanguageComboBox"
+                        Width="120"
+                        Margin="5"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        SelectedIndex="0">
+                        <ComboBoxItem Content="English" />
+                        <ComboBoxItem Content="Spanish" />
+                    </ComboBox>
+                    <Button
+                        x:Name="TestDollarsButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Click="TestDollarsButton_Click"
+                        Content="Test with Dollars" />
+                    <Button
+                        x:Name="TestPesosButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Click="TestPesosButton_Click"
+                        Content="Test with Pesos" />
+                    <Button
+                        x:Name="RunAllTestsButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Background="#FF007ACC"
+                        Click="RunAllTestsButton_Click"
+                        Content="Run All Tests"
+                        FontWeight="Bold"
+                        Foreground="White" />
+                </StackPanel>
+
+                <TextBox
+                    x:Name="AllTestResultsTextBox"
+                    Grid.Row="2"
+                    Margin="5"
+                    FontFamily="Consolas"
+                    FontSize="12"
+                    IsReadOnly="True"
+                    TextWrapping="Wrap"
+                    VerticalScrollBarVisibility="Auto" />
+            </Grid>
+        </TabItem>
+    </TabControl>
+</Window>

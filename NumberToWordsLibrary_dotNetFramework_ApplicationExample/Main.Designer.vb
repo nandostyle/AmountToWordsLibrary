@@ -77,6 +77,7 @@ Partial Class Main
         'cmbCurrency
         '
         Me.cmbCurrency.FormattingEnabled = True
+        Me.cmbCurrency.Items.AddRange(New Object() {"Dollars", "Pesos"})
         Me.cmbCurrency.Location = New System.Drawing.Point(560, 22)
         Me.cmbCurrency.Name = "cmbCurrency"
         Me.cmbCurrency.Size = New System.Drawing.Size(121, 21)

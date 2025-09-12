@@ -13,12 +13,11 @@ namespace NandoStyle.NumberToWordConverter
 
         private static readonly string[] en_Ones = new string[] { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" };
         private static readonly string[] en_Tens = new string[] { "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety" };
-        private static readonly string[] en_Thousands = new string[] { "", "thousand", "million", "billion", "trillion" };
         private static readonly string[] es_Ones = new string[] { "cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte", "veintiuno", "veintidós", "veintitrés", "veinticuatro", "veinticinco", "veintiséis", "veintisiete", "veintiocho", "veintinueve" };
         private static readonly string[] es_Tens = new string[] { "", "", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa" };
         private static readonly string[] es_Hundreds = new string[] { "", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos" };
 
-        #endregion
+        #endregion Word Arrays
 
         /// <summary>
         /// The main entry point for the conversion. It checks the application's culture
@@ -32,14 +31,15 @@ namespace NandoStyle.NumberToWordConverter
             English,
             Spanish
         }
+
         public enum CurrencyToUse
         {
             Dollar,
             Peso
         }
+
         public static string ToWords(decimal number, LanguageToUse language, CurrencyToUse CurrencyToUse)
         {
-
             if (language == LanguageToUse.Spanish)
             {
                 return ToWordsSpanish(number, CurrencyToUse);
@@ -68,7 +68,7 @@ namespace NandoStyle.NumberToWordConverter
 
                 if (number == 0)
                 {
-                    return string.Format("Cero {0}", pluralCurrency);
+                    return $"Cero {pluralCurrency}";
                 }
 
                 long wholePart = (long)Math.Truncate(number);
@@ -80,18 +80,20 @@ namespace NandoStyle.NumberToWordConverter
                 {
                     string numberWords = ConvertNumberSpanish(wholePart);
                     sb.Append(numberWords);
-                    bool requiresPrepositionDe = (wholePart % 1000000 == 0) && (wholePart >= 1000000);
-                    if (requiresPrepositionDe)
+
+                    // The preposition "de" is used with "millón/millones" when they are not followed by other numbers.
+                    if ((numberWords.EndsWith("millón") || numberWords.EndsWith("millones")) && wholePart % 1000000 == 0)
                     {
                         sb.Append(" de");
                     }
-                    sb.Append(wholePart == 1 ? string.Format(" {0}", singularCurrency) : string.Format(" {0}", pluralCurrency));
+                    sb.Append(wholePart == 1 ? $" {singularCurrency}" : $" {pluralCurrency}");
                 }
+
                 if (decimalPart > 0)
                 {
                     if (wholePart > 0) sb.Append(" con ");
                     sb.Append(ConvertNumberSpanish(decimalPart));
-                    sb.Append(decimalPart == 1 ? string.Format(" {0}", singularSubCurrency) : string.Format(" {0}", pluralSubCurrency));
+                    sb.Append(decimalPart == 1 ? $" {singularSubCurrency}" : $" {pluralSubCurrency}");
                 }
 
                 string result = sb.ToString().Trim();
@@ -99,7 +101,7 @@ namespace NandoStyle.NumberToWordConverter
             }
             catch (Exception ex)
             {
-                Console.WriteLine ("Must likely you enter a too large number. Error: " + ex.Message);
+                Console.WriteLine("Most likely you entered a too large number. Error: " + ex.Message);
                 return string.Empty;
             }
         }
@@ -108,29 +110,47 @@ namespace NandoStyle.NumberToWordConverter
         {
             if (number == 0) return "cero";
 
-            var groups = new List<long>();
-            while (number > 0)
-            {
-                groups.Add(number % 1000);
-                number /= 1000;
-            }
-
             var words = new StringBuilder();
-            for (int i = groups.Count - 1; i >= 0; i--)
-            {
-                long currentPart = groups[i];
-                if (currentPart == 0) continue;
 
-                if (i == 5) words.Append(currentPart == 1 ? "mil " : string.Format("{0} mil ", ConvertUpto999Spanish(currentPart, true)));
-                if (i == 4) words.Append(currentPart == 1 ? "un billón " : string.Format("{0} billones ", ConvertUpto999Spanish(currentPart, false)));
-                if (i == 3) words.Append(currentPart == 1 ? "mil " : string.Format("{0} mil ", ConvertUpto999Spanish(currentPart, true)));
-                if (i == 2) words.Append(currentPart == 1 ? "un millón " : string.Format("{0} millones ", ConvertUpto999Spanish(currentPart, false)));
-                if (i == 1) words.Append(currentPart == 1 ? "mil " : string.Format("{0} mil ", ConvertUpto999Spanish(currentPart, true)));
-                if (i == 0) words.Append(ConvertUpto999Spanish(currentPart, true));
+            // Handle millions
+            if ((number / 1000000) > 0)
+            {
+                long millionsPart = number / 1000000;
+                if (millionsPart == 1)
+                {
+                    words.Append("un millón ");
+                }
+                else
+                {
+                    words.Append(ConvertNumberSpanish(millionsPart) + " millones ");
+                }
+                number %= 1000000;
             }
 
-            return Regex.Replace(words.ToString().Trim(), @"\s+", " ");
+            // Handle thousands
+            if ((number / 1000) > 0)
+            {
+                long thousandsPart = number / 1000;
+                if (thousandsPart == 1)
+                {
+                    words.Append("mil ");
+                }
+                else
+                {
+                    words.Append(ConvertUpto999Spanish(thousandsPart, true) + " mil ");
+                }
+                number %= 1000;
+            }
+
+            // Handle hundreds, tens, and ones
+            if (number > 0)
+            {
+                words.Append(ConvertUpto999Spanish(number, true));
+            }
+
+            return words.ToString().Trim();
         }
+
 
         private static string ConvertUpto999Spanish(long number, bool applyApocope)
         {
@@ -140,23 +160,17 @@ namespace NandoStyle.NumberToWordConverter
             long hundreds = number / 100;
             long tensAndOnes = number % 100;
 
-            if (hundreds > 0) sb.Append(es_Hundreds[hundreds]);
+            if (hundreds > 0)
+            {
+                sb.Append(es_Hundreds[hundreds]);
+            }
 
             if (tensAndOnes > 0)
             {
                 if (hundreds > 0) sb.Append(" ");
                 if (tensAndOnes < 30)
                 {
-                    string onesWord = es_Ones[tensAndOnes];
-                    if (applyApocope && (tensAndOnes == 1 || tensAndOnes == 21))
-                    {
-                        onesWord = onesWord.Remove(onesWord.Length - 1);
-                    }
-                    if (tensAndOnes == 21)
-                    {
-                        onesWord = onesWord.Replace("un", "ún");
-                    }
-                    sb.Append(onesWord);
+                    sb.Append(es_Ones[tensAndOnes]);
                 }
                 else
                 {
@@ -165,11 +179,26 @@ namespace NandoStyle.NumberToWordConverter
                     sb.Append(es_Tens[tens]);
                     if (ones > 0)
                     {
-                        sb.Append(string.Format(" y {0}", (applyApocope && ones == 1 ? "un" : es_Ones[ones])));
+                        sb.Append($" y {es_Ones[ones]}");
                     }
                 }
             }
-            return sb.ToString();
+            string result = sb.ToString();
+
+            // Apply apocope (shortening of "uno" to "un" and "veintiuno" to "veintiún")
+            if (applyApocope)
+            {
+                if (result.Equals("veintiuno"))
+                {
+                    return "veintiún";
+                }
+                if (result.EndsWith("uno"))
+                {
+                    // Handles "ciento uno" -> "ciento un", "treinta y uno" -> "treinta y un"
+                    return result.Substring(0, result.Length - 1);
+                }
+            }
+            return result;
         }
 
         #endregion Spanish Conversion Logic
@@ -221,7 +250,7 @@ namespace NandoStyle.NumberToWordConverter
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Must likely you enter a too large number. Error: " + ex.Message);
+                Console.WriteLine("Most likely you entered a too large number. Error: " + ex.Message);
                 return string.Empty;
             }
         }
@@ -253,7 +282,7 @@ namespace NandoStyle.NumberToWordConverter
             }
             if (number > 0)
             {
-                if (words.Length > 0) words.Append("and ");
+                if (words.Length > 0 && (number < 100 && number % 100 != 0)) words.Append("and ");
                 if (number < 20)
                 {
                     words.Append(en_Ones[number]);
@@ -275,86 +304,93 @@ namespace NandoStyle.NumberToWordConverter
         private static readonly Dictionary<LanguageToUse, Dictionary<CurrencyToUse, Dictionary<decimal, string>>> TestCases =
         new Dictionary<LanguageToUse, Dictionary<CurrencyToUse, Dictionary<decimal, string>>>
         {
-            // Top-level dictionary, keyed by language.
-            {
-                LanguageToUse.Spanish, new Dictionary<CurrencyToUse, Dictionary<decimal, string>>
+                // Top-level dictionary, keyed by language.
                 {
-                    // Nested dictionary for Spanish, keyed by currency.
+                    LanguageToUse.Spanish, new Dictionary<CurrencyToUse, Dictionary<decimal, string>>
                     {
-                        CurrencyToUse.Peso, new Dictionary<decimal, string>
+                        // Nested dictionary for Spanish, keyed by currency.
                         {
-                            // Innermost dictionary contains the test cases: decimal number mapped to the expected word string.
-                            { 0m, "Cero pesos" },
-                            { 1.00m, "Un peso" },
-                            { 21.00m, "Veintiún pesos" },
-                            { 100.00m, "Cien pesos" },
-                            { 101.50m, "Ciento un pesos con cincuenta centavos" },
-                            { 1000.00m, "Mil pesos" },
-                            { 1001.00m, "Mil un pesos" },
-                            { 2000.00m, "Dos mil pesos" },
-                            { 1000000.00m, "Un millón de pesos" },
-                            { 2000000.00m, "Dos millones de pesos" },
-                            { 1151021.21m, "Un millón ciento cincuenta y un mil veintiún pesos con veintiún centavos" },
-                            { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil pesos con dos centavos" }
-                        }
-                    },
-                    {
-                        CurrencyToUse.Dollar, new Dictionary<decimal, string>
+                            CurrencyToUse.Peso, new Dictionary<decimal, string>
+                            {
+                                // Innermost dictionary contains the test cases: decimal number mapped to the expected word string.
+                                { 0m, "Cero pesos" },
+                                { 1.00m, "Un peso" },
+                                { 21.00m, "Veintiún pesos" },
+                                { 100.00m, "Cien pesos" },
+                                { 101.50m, "Ciento un pesos con cincuenta centavos" },
+                                { 1000.00m, "Mil pesos" },
+                                { 1001.00m, "Mil un pesos" },
+                                { 2000.00m, "Dos mil pesos" },
+                                { 1000000.00m, "Un millón de pesos" },
+                                { 2000000.00m, "Dos millones de pesos" },
+                                { 1151021.21m, "Un millón ciento cincuenta y un mil veintiún pesos con veintiún centavos" },
+                                { 1000005150.79m, "Mil millones cinco mil ciento cincuenta pesos con setenta y nueve centavos" },
+                                { 1234567890.50m, "Mil doscientos treinta y cuatro millones quinientos sesenta y siete mil ochocientos noventa pesos con cincuenta centavos" },
+                                { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil pesos con dos centavos" }
+                            }
+                        },
                         {
-                            { 0m, "Cero dólares" },
-                            { 1.00m, "Un dólar" },
-                            { 21.00m, "Veintiún dólares" },
-                            { 100.00m, "Cien dólares" },
-                            { 101.50m, "Ciento un dólares con cincuenta centavos" },
-                            { 1000.00m, "Mil dólares" },
-                            { 1001.00m, "Mil un dólares" },
-                            { 2000.00m, "Dos mil dólares" },
-                            { 1000000.00m, "Un millón de dólares" },
-                            { 2000000.00m, "Dos millones de dólares" },
-                            { 1151021.21m, "Un millón ciento cincuenta y un mil veintiún dólares con veintiún centavos" },
-                            { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil dólares con dos centavos" }
+                            CurrencyToUse.Dollar, new Dictionary<decimal, string>
+                            {
+                                { 0m, "Cero dólares" },
+                                { 1.00m, "Un dólar" },
+                                { 21.00m, "Veintiún dólares" },
+                                { 100.00m, "Cien dólares" },
+                                { 101.50m, "Ciento un dólares con cincuenta centavos" },
+                                { 1000.00m, "Mil dólares" },
+                                { 1001.00m, "Mil un dólares" },
+                                { 2000.00m, "Dos mil dólares" },
+                                { 1000000.00m, "Un millón de dólares" },
+                                { 2000000.00m, "Dos millones de dólares" },
+                                { 1151021.21m, "Un millón ciento cincuenta y un mil veintiún dólares con veintiún centavos" },
+                                { 1000005150.79m, "Mil millones cinco mil ciento cincuenta dólares con setenta y nueve centavos" },
+                                { 1234567890.50m, "Mil doscientos treinta y cuatro millones quinientos sesenta y siete mil ochocientos noventa dólares con cincuenta centavos" },
+                                { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil dólares con dos centavos" }
+                            }
                         }
-                    }
-                }
-            },
-            {
-            LanguageToUse.English, new Dictionary<CurrencyToUse, Dictionary<decimal, string>>
-            {
-                {
-                    CurrencyToUse.Dollar, new Dictionary<decimal, string>
-                    {
-                        { 0m, "Zero dollars" },
-                        { 1.00m, "One dollar" },
-                        { 21.00m, "Twenty-one dollars" },
-                        { 100.00m, "One hundred dollars" },
-                        { 101.50m, "One hundred and one dollars and fifty cents" },
-                        { 1000.00m, "One thousand dollars" },
-                        { 1001.00m, "One thousand and one dollars" },
-                        { 2000.00m, "Two thousand dollars" },
-                        { 1000000.00m, "One million dollars" },
-                        { 1151021.21m, "One million one hundred and fifty-one thousand and twenty-one dollars and twenty-one cents" },
-                        { 1234567890.50m, "One billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety dollars and fifty cents" },
-                        { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand dollars and two cents" }
                     }
                 },
                 {
-                    CurrencyToUse.Peso, new Dictionary<decimal, string>
+                    LanguageToUse.English, new Dictionary<CurrencyToUse, Dictionary<decimal, string>>
                     {
-                        { 0m, "Zero pesos" },
-                        { 1.00m, "One peso" },
-                        { 21.00m, "Twenty-one pesos" },
-                        { 100.00m, "One hundred pesos" },
-                        { 101.50m, "One hundred and one pesos and fifty cents" },
-                        { 1000.00m, "One thousand pesos" },
-                        { 1001.00m, "One thousand and one pesos" },
-                        { 2000.00m, "Two thousand pesos" },
-                        { 1000000.00m, "One million pesos" },
-                        { 1151021.21m, "One million one hundred and fifty-one thousand and twenty-one pesos and twenty-one cents" },
-                        { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand pesos and two cents" }
+                        {
+                            CurrencyToUse.Dollar, new Dictionary<decimal, string>
+                            {
+                                { 0m, "Zero dollars" },
+                                { 1.00m, "One dollar" },
+                                { 21.00m, "Twenty-one dollars" },
+                                { 100.00m, "One hundred dollars" },
+                                { 101.50m, "One hundred and one dollars and fifty cents" },
+                                { 1000.00m, "One thousand dollars" },
+                                { 1001.00m, "One thousand and one dollars" },
+                                { 2000.00m, "Two thousand dollars" },
+                                { 1000000.00m, "One million dollars" },
+                                { 1151021.21m, "One million one hundred and fifty-one thousand and twenty-one dollars and twenty-one cents" },
+                                { 1000005150.79m , "One billion five thousand one hundred and fifty dollars and seventy-nine cents" },
+                                { 1234567890.50m, "One billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety dollars and fifty cents" },
+                                { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand dollars and two cents" }
+                            }
+                        },
+                        {
+                            CurrencyToUse.Peso, new Dictionary<decimal, string>
+                            {
+                                { 0m, "Zero pesos" },
+                                { 1.00m, "One peso" },
+                                { 21.00m, "Twenty-one pesos" },
+                                { 100.00m, "One hundred pesos" },
+                                { 101.50m, "One hundred and one pesos and fifty cents" },
+                                { 1000.00m, "One thousand pesos" },
+                                { 1001.00m, "One thousand and one pesos" },
+                                { 2000.00m, "Two thousand pesos" },
+                                { 1000000.00m, "One million pesos" },
+                                { 1151021.21m, "One million one hundred and fifty-one thousand and twenty-one pesos and twenty-one cents" },
+                                { 1000005150.79m , "One billion five thousand one hundred and fifty pesos and seventy-nine cents" },
+                                { 1234567890.50m, "One billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety pesos and fifty cents" },
+                                { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand pesos and two cents" }
+                            }
+                        }
                     }
                 }
-            }
-}
         };
 
         // Main function to run automated tests for a specific language and currency combination.
@@ -416,8 +452,8 @@ namespace NandoStyle.NumberToWordConverter
 
         public class ThisCurrencyItem
         {
-            public string CurrencyISOCode { get; set; } = null;
-            public string CurrencyDescription { get; set; } = null;
+            public string? CurrencyISOCode { get; set; }
+            public string? CurrencyDescription { get; set; }
             public decimal CurrencyPriceInUSD { get; set; }
             public int CurrencyIsDefault { get; set; }
             public DateTime? CurrencyLastModifiedOn { get; set; }

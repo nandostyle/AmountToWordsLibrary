@@ -4,7 +4,7 @@ NumberToWordConverter
 
 ### A static utility class to convert numbers to words in multiple languages and currencies.
 
-A self-contained C#/.NET 6 class library designed for easy integration into any .NET application, including those using VB.NET. It converts a decimal number into its word representation, handling multiple languages and currency formats.
+A self-contained C#/.NET 6 or .NET Framework 4.7.2 class library designed for easy integration into any .NET application, including those using VB.NET. It converts a decimal number into its word representation, handling multiple languages and currency formats.
 
 > **Note:** The code is designed to be easily adaptable to almost any .NET Framework or .NET version.
 
@@ -55,7 +55,7 @@ To use this converter in your .NET project, you should first compile it into a .
         // Example in C#
         public static void Main()
         {
-            NumberToWordConverter.NumberTowordsAutomatedTester();
+            Console.WriteLine(NumberToWordConverter.NumberTowordsAutomatedTester());
         }
    It will output the results to the console.
 

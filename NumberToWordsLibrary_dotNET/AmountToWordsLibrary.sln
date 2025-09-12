@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NumberToWordsLibrary_dotNET", "NumberToWordsLibrary_dotNET.csproj", "{56FCE002-9E1F-4860-8A79-FF1CEB86B20E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmountToWordsLibrary_dotNET", "AmountToWordsLibrary_dotNET.csproj", "{56FCE002-9E1F-4860-8A79-FF1CEB86B20E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NumberToWordConverter_dotNETFramework", "..\NumberToWordConverter_dotNETFramework\NumberToWordConverter_dotNETFramework.csproj", "{5E229AE8-2B5A-4D0E-ADE3-9D098F00C3E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmountToWordConverter_dotNETFramework", "..\NumberToWordConverter_dotNETFramework\AmountToWordConverter_dotNETFramework.csproj", "{5E229AE8-2B5A-4D0E-ADE3-9D098F00C3E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NumberToWordsConverter_dotNET_ApplicationExample", "..\NumberToWordsConverter_dotNET_ApplicationExample\NumberToWordsConverter_dotNET_ApplicationExample.csproj", "{306FBBAD-68AA-A177-8C89-83B5A7647A9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmountToWordsConverter_dotNET_ApplicationExample", "..\NumberToWordsConverter_dotNET_ApplicationExample\AmountToWordsConverter_dotNET_ApplicationExample.csproj", "{306FBBAD-68AA-A177-8C89-83B5A7647A9C}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NumberToWordsLibrary_dotNetFramework_ApplicationExample", "..\NumberToWordsLibrary_dotNetFramework_ApplicationExample\NumberToWordsLibrary_dotNetFramework_ApplicationExample.vbproj", "{42BF5C88-1B74-4BBC-98D8-D4B1B7D99920}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "AmountToWordsLibrary_dotNetFramework_ApplicationExample", "..\NumberToWordsLibrary_dotNetFramework_ApplicationExample\AmountToWordsLibrary_dotNetFramework_ApplicationExample.vbproj", "{42BF5C88-1B74-4BBC-98D8-D4B1B7D99920}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

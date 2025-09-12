@@ -122,9 +122,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NumberToWordConverter_dotNETFramework\NumberToWordConverter_dotNETFramework.csproj">
+    <ProjectReference Include="..\NumberToWordConverter_dotNETFramework\AmountToWordConverter_dotNETFramework.csproj">
       <Project>{5e229ae8-2b5a-4d0e-ade3-9d098f00c3e5}</Project>
-      <Name>NumberToWordConverter_dotNETFramework</Name>
+      <Name>AmountToWordConverter_dotNETFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

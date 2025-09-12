@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using System.Windows;
-using static NandoStyle.NumberToWordConverter.NumberToWordConverter;
+using static NandoStyle.NumberToWordConverter.AmountToWordConverter;
 
 namespace NumberToWordsConverter_ApplicationExample
 {

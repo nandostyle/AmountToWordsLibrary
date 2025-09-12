@@ -7,7 +7,7 @@ namespace NandoStyle.NumberToWordConverter
     /// A static utility class for .NET 6.0 and higher, to convert decimal numbers into their currency word representation
     /// for both English and Spanish. The class is self-contained and does not rely on external resources.
     /// </summary>
-    public static class NumberToWordConverter
+    public static class AmountToWordConverter
     {
         #region Word Arrays
 
@@ -411,7 +411,7 @@ namespace NandoStyle.NumberToWordConverter
                 foreach (var test in testCases)
                 {
                     // Call the main conversion method with the test number, language, and currency.
-                    string result = NumberToWordConverter.ToWords(test.Key, language, currency);
+                    string result = AmountToWordConverter.ToWords(test.Key, language, currency);
 
                     // Compare the actual result with the expected result and determine PASS or FAIL.
                     string status = (result == test.Value) ? "PASS" : "FAIL";

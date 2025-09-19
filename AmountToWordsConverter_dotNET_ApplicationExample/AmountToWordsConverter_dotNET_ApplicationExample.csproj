@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NumberToWordsLibrary_dotNET\AmountToWordsLibrary_dotNET.csproj" />
+    <ProjectReference Include="..\AmountToWordsLibrary_dotNET\AmountToWordsLibrary_dotNET.csproj" />
   </ItemGroup>
 
 </Project>

@@ -122,7 +122,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NumberToWordConverter_dotNETFramework\AmountToWordConverter_dotNETFramework.csproj">
+    <ProjectReference Include="..\AmountToWordConverter_dotNETFramework\AmountToWordConverter_dotNETFramework.csproj">
       <Project>{5e229ae8-2b5a-4d0e-ade3-9d098f00c3e5}</Project>
       <Name>AmountToWordConverter_dotNETFramework</Name>
     </ProjectReference>

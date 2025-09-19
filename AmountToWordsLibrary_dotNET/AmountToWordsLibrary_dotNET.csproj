@@ -6,6 +6,23 @@
     <Nullable>enable</Nullable>
     <AssemblyVersion>1.0.0.3</AssemblyVersion>
     <FileVersion>1.0.0.3</FileVersion>
+    <Title>Amount toWords Converter</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>A self-contained C#/.NET 6 (Compatible with more modern .NET versions) class library designed for easy integration into any .NET application, including those using VB.NET. It converts an amount (represented by two decimal numbers) into its word representation, handling multiple languages and currency formats.</Description>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <Version>1.0.0.3</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>

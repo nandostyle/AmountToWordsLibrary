@@ -8,7 +8,7 @@ namespace NandoStyle.NumberToWordConverter
     /// A static utility class for .NET 6.0 and higher, to convert decimal numbers into their currency word representation
     /// for both English and Spanish. The class is self-contained and does not rely on external resources.
     /// </summary>
-    public static class NumberToWordConverter
+    public static class AmountToWordConverter
     {
         #region Word Arrays
 
@@ -20,32 +20,37 @@ namespace NandoStyle.NumberToWordConverter
 
         #endregion Word Arrays
 
-        /// <summary>
-        /// The main entry point for the conversion. It checks the application's culture
-        /// and routes the request to the appropriate language-specific method.
-        /// </summary>
-        /// <param name="number">The decimal number to convert.</param>
-        /// <param name="language">The currency context (not used for logic in this version).</param>
-        /// <param name="CurrencyToUse">: Peso, Dollars, pluralization is handled automatically.</param>
+        
         public enum LanguageToUse
         {
             English,
             Spanish
         }
-
         public enum CurrencyToUse
         {
             Dollar,
             Peso
         }
-
-        public static string ToWords(decimal number, LanguageToUse language, CurrencyToUse CurrencyToUse)
+        /// <summary>
+        /// Converts a decimal number to its word representation using a specific language and currency.
+        /// </summary>
+        /// <param name="number">The decimal number to convert to words.</param>
+        /// <param name="language">The target language for the conversion (e.g., English, Spanish).</param>
+        /// <param name="currency">The currency to use for the word representation (e.g., Dollar, Peso).</param>
+        /// <returns>A string containing the number expressed in words.</returns>
+        public static string ToWords(decimal number, LanguageToUse language, CurrencyToUse currency)
         {
-            if (language == LanguageToUse.Spanish)
+            switch (language)
             {
-                return ToWordsSpanish(number, CurrencyToUse);
+                case LanguageToUse.Spanish:
+                    return ToWordsSpanish(number, currency);
+
+                case LanguageToUse.English:
+                    return ToWordsEnglish(number, currency);
+
+                default:
+                    throw new NotImplementedException($"Language '{language}' is not supported.");
             }
-            return ToWordsEnglish(number, CurrencyToUse);
         }
 
         #region Spanish Conversion Logic
@@ -412,7 +417,7 @@ namespace NandoStyle.NumberToWordConverter
                 foreach (var test in testCases)
                 {
                     // Call the main conversion method with the test number, language, and currency.
-                    string result = NumberToWordConverter.ToWords(test.Key, language, currency);
+                    string result = AmountToWordConverter.ToWords(test.Key, language, currency);
 
                     // Compare the actual result with the expected result and determine PASS or FAIL.
                     string status = (result == test.Value) ? "PASS" : "FAIL";

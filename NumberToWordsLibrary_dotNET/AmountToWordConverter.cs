@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-namespace NandoStyle.NumberToWordConverter
+namespace AmountToWordsLibrary_dotNET
 {
     /// <summary>
     /// A static utility class for .NET 6.0 and higher, to convert decimal numbers into their currency word representation
@@ -19,13 +19,7 @@ namespace NandoStyle.NumberToWordConverter
 
         #endregion Word Arrays
 
-        /// <summary>
-        /// The main entry point for the conversion. It checks the application's culture
-        /// and routes the request to the appropriate language-specific method.
-        /// </summary>
-        /// <param name="number">The decimal number to convert.</param>
-        /// <param name="language">The currency context (not used for logic in this version).</param>
-        /// <param name="CurrencyToUse">: Peso, Dollars, pluralization is handled automatically.</param>
+        
         public enum LanguageToUse
         {
             English,
@@ -37,14 +31,26 @@ namespace NandoStyle.NumberToWordConverter
             Dollar,
             Peso
         }
-
-        public static string ToWords(decimal number, LanguageToUse language, CurrencyToUse CurrencyToUse)
+        /// <summary>
+        /// Converts a decimal number to its word representation using a specific language and currency.
+        /// </summary>
+        /// <param name="number">The decimal number to convert to words.</param>
+        /// <param name="language">The target language for the conversion (e.g., English, Spanish).</param>
+        /// <param name="currency">The currency to use for the word representation (e.g., Dollar, Peso).</param>
+        /// <returns>A string containing the number expressed in words.</returns>
+        public static string ToWords(decimal number, LanguageToUse language, CurrencyToUse currency)
         {
-            if (language == LanguageToUse.Spanish)
+            switch (language)
             {
-                return ToWordsSpanish(number, CurrencyToUse);
+                case LanguageToUse.Spanish:
+                    return ToWordsSpanish(number, currency);
+
+                case LanguageToUse.English:
+                    return ToWordsEnglish(number, currency);
+
+                default:
+                    throw new NotImplementedException($"Language '{language}' is not supported.");
             }
-            return ToWordsEnglish(number, CurrencyToUse);
         }
 
         #region Spanish Conversion Logic
@@ -113,7 +119,7 @@ namespace NandoStyle.NumberToWordConverter
             var words = new StringBuilder();
 
             // Handle millions
-            if ((number / 1000000) > 0)
+            if (number / 1000000 > 0)
             {
                 long millionsPart = number / 1000000;
                 if (millionsPart == 1)
@@ -128,7 +134,7 @@ namespace NandoStyle.NumberToWordConverter
             }
 
             // Handle thousands
-            if ((number / 1000) > 0)
+            if (number / 1000 > 0)
             {
                 long thousandsPart = number / 1000;
                 if (thousandsPart == 1)
@@ -260,29 +266,29 @@ namespace NandoStyle.NumberToWordConverter
             if (number == 0) return "zero";
 
             var words = new StringBuilder();
-            if ((number / 1000000000) > 0)
+            if (number / 1000000000 > 0)
             {
                 words.Append(ConvertNumberEnglish(number / 1000000000) + " billion ");
                 number %= 1000000000;
             }
-            if ((number / 1000000) > 0)
+            if (number / 1000000 > 0)
             {
                 words.Append(ConvertNumberEnglish(number / 1000000) + " million ");
                 number %= 1000000;
             }
-            if ((number / 1000) > 0)
+            if (number / 1000 > 0)
             {
                 words.Append(ConvertNumberEnglish(number / 1000) + " thousand ");
                 number %= 1000;
             }
-            if ((number / 100) > 0)
+            if (number / 100 > 0)
             {
                 words.Append(ConvertNumberEnglish(number / 100) + " hundred ");
                 number %= 100;
             }
             if (number > 0)
             {
-                if (words.Length > 0 && (number < 100 && number % 100 != 0)) words.Append("and ");
+                if (words.Length > 0 && number < 100 && number % 100 != 0) words.Append("and ");
                 if (number < 20)
                 {
                     words.Append(en_Ones[number]);
@@ -290,7 +296,7 @@ namespace NandoStyle.NumberToWordConverter
                 else
                 {
                     words.Append(en_Tens[number / 10]);
-                    if ((number % 10) > 0)
+                    if (number % 10 > 0)
                         words.Append("-" + en_Ones[number % 10]);
                 }
             }
@@ -411,10 +417,10 @@ namespace NandoStyle.NumberToWordConverter
                 foreach (var test in testCases)
                 {
                     // Call the main conversion method with the test number, language, and currency.
-                    string result = AmountToWordConverter.ToWords(test.Key, language, currency);
+                    string result = ToWords(test.Key, language, currency);
 
                     // Compare the actual result with the expected result and determine PASS or FAIL.
-                    string status = (result == test.Value) ? "PASS" : "FAIL";
+                    string status = result == test.Value ? "PASS" : "FAIL";
 
                     // Append the test result to the string, showing the input, the actual output, and the status.
                     Results.AppendLine(string.Format("{0} => {1} ({2})", test.Key, result, status));

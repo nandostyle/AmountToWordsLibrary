@@ -12,40 +12,85 @@ A self-contained C#/.NET 6 or .NET Framework 4.7.2 class library designed for ea
 
 * **Multi-language Support**: Automatically converts numbers to words in both **English** (en-US) and **Spanish** (es-MX).
 * **Currency Handling**: Accurately formats currency for **USD** (dollars and cents) and **MXN** (pesos and centavos).
+* **Negative Number Support**: Convert negative amounts with language-specific prefixes ("Negative" for English, "Negativo" for Spanish).
+* **Plain Number Mode**: Convert plain numbers without currency words, with decimal representation using "point" (English) or "coma" (Spanish).
+* **ConversionMode Enum**: Flexible `ConversionMode` parameter for `Currency_Dollar`, `Currency_Peso`, or `PlainNumber` conversions.
 * **Extensible**: Easily extend the class to support additional languages or number scales.
 * **Robust Logic**: Handles complex number conversions, including large numbers (millions, billions) and specific Spanish grammar rules (e.g., "veintiuno," "ciento" vs. "cien").
 
 ---
 
 ### How to Use
-1. Installation
-To use this converter in your .NET project, you should first compile it into a .dll file.
 
-    * Create a new Class Library project in Visual Studio.
-    
-    * Add the NumberToWordConverter.cs file to your new project.
-    
-    * Build the project.
+#### Installation (NuGet)
+```
+Install-Package NandoStyle.AmountToWords
+```
 
-    * The output NumberToWordConverter.dll file will be in the bin/Debug (or bin/Release) folder.
-    
-    * In your main application (e.g., a VB.NET or C# project), add a reference to this .dll file.
+Or search for `NandoStyle.AmountToWords` in the NuGet Package Manager.
 
-3. Basic Usage
-    The ToWords method serves as the primary entry point for the conversion. It requires a decimal number and a CultureInfo object to determine the language.
-   ```csharp
-    // Example in C#
-    using System;
-    using MyProject.NumberToWords; // Assuming this is your project's namespace
-    //
-    decimal amount = 1234567890.50m;
-    // Convert the number to words in Spanish
-    string spanishWords = NumberToWordConverter.ToWords(amount,LanguageToUse.Spanish, CurrencyToUse.Dollar);
-    Console.WriteLine(spanishWords);
-   // Output: "Mil doscientos treinta y cuatro millones quinientos sesenta y siete mil ochocientos noventa dólares con cincuenta centavos"
+#### Basic Usage
 
+The library provides the `AmountToWordConverter` class with multiple overloads of the `ToWords` method:
 
-4. Automated Testing
+**Currency Conversion (Backward Compatible):**
+```csharp
+using NandoStyle.AmountToWords;
+
+decimal amount = 1234567890.50m;
+
+// Convert to Spanish pesos
+string spanishWords = AmountToWordConverter.ToWords(
+    amount, 
+    AmountToWordConverter.LanguageToUse.Spanish, 
+    AmountToWordConverter.CurrencyToUse.Peso
+);
+// Output: "Un mil doscientos treinta y cuatro millones quinientos sesenta y siete mil ochocientos noventa pesos con cincuenta centavos"
+
+// Convert to English dollars
+string englishWords = AmountToWordConverter.ToWords(
+    amount, 
+    AmountToWordConverter.LanguageToUse.English, 
+    AmountToWordConverter.CurrencyToUse.Dollar
+);
+// Output: "One billion two hundred thirty four million five hundred sixty seven thousand eight hundred ninety dollars and fifty cents"
+```
+
+**Using ConversionMode (New in v1.1.0):**
+```csharp
+// Plain number conversion (no currency)
+string plainEN = AmountToWordConverter.ToWords(
+    123.45m,
+    AmountToWordConverter.LanguageToUse.English,
+    AmountToWordConverter.ConversionMode.PlainNumber
+);
+// Output: "One hundred twenty three point forty five"
+
+string plainES = AmountToWordConverter.ToWords(
+    123.45m,
+    AmountToWordConverter.LanguageToUse.Spanish,
+    AmountToWordConverter.ConversionMode.PlainNumber
+);
+// Output: "Ciento veintitrés coma cuarenta y cinco"
+
+// Negative numbers
+string negativeEN = AmountToWordConverter.ToWords(
+    -50.00m,
+    AmountToWordConverter.LanguageToUse.English,
+    AmountToWordConverter.ConversionMode.Currency_Dollar
+);
+// Output: "Negative fifty dollars"
+
+string negativeES = AmountToWordConverter.ToWords(
+    -50.00m,
+    AmountToWordConverter.LanguageToUse.Spanish,
+    AmountToWordConverter.ConversionMode.Currency_Peso
+);
+// Output: "Negativo cincuenta pesos"
+```
+
+#### Automated Testing
+
     This project also includes a self-contained automated test suite in the NumberTowordsAutomatedTester() method. This is useful for verifying that the conversion logic works correctly for various numbers and languages.
     
     To run the tests, call this static method from your application's startup.

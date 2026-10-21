@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows.Input;
 using NumberToWordsConverter_ApplicationExample.Commands;
 using NumberToWordsConverter_ApplicationExample.Models;
-using static AmountToWordsLibrary_dotNET.AmountToWordConverter;
+using static NandoStyle.AmountToWords.AmountToWordConverter;
 
 namespace NumberToWordsConverter_ApplicationExample.ViewModels
 {
@@ -13,6 +13,7 @@ namespace NumberToWordsConverter_ApplicationExample.ViewModels
         private string inputNumber = "12345.67";
         private LanguageToUse selectedLanguage = LanguageToUse.English;
         private CurrencyToUse selectedCurrency = CurrencyToUse.Dollar;
+        private ConversionMode selectedConversionMode = ConversionMode.Currency_Dollar;
         private LanguageToUse selectedTestLanguage = LanguageToUse.English;
         private string results = string.Empty;
         private string allTestResults = string.Empty;
@@ -20,9 +21,13 @@ namespace NumberToWordsConverter_ApplicationExample.ViewModels
         public MainWindowViewModel()
         {
             ConvertCommand = new RelayCommand(ConvertAmount);
+            ConvertPlainNumberCommand = new RelayCommand(ConvertPlainNumber);
+            ConvertNegativeCommand = new RelayCommand(ConvertNegativeAmount);
             TestDollarsCommand = new RelayCommand(() => RunTests(CurrencyToUse.Dollar));
             TestPesosCommand = new RelayCommand(() => RunTests(CurrencyToUse.Peso));
             RunAllTestsCommand = new RelayCommand(RunAllTests);
+            TestPlainNumbersCommand = new RelayCommand(TestPlainNumbers);
+            TestNegativeAmountsCommand = new RelayCommand(TestNegativeAmounts);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -35,6 +40,14 @@ namespace NumberToWordsConverter_ApplicationExample.ViewModels
             {
                 new CurrencyOption(CurrencyToUse.Dollar, "Dollars"),
                 new CurrencyOption(CurrencyToUse.Peso, "Pesos")
+            });
+
+        public IReadOnlyList<ConversionModeOption> ConversionModes { get; } =
+            Array.AsReadOnly(new[]
+            {
+                new ConversionModeOption(ConversionMode.Currency_Dollar, "Currency - Dollars"),
+                new ConversionModeOption(ConversionMode.Currency_Peso, "Currency - Pesos"),
+                new ConversionModeOption(ConversionMode.PlainNumber, "Plain Number")
             });
 
         public string InputNumber
@@ -53,6 +66,12 @@ namespace NumberToWordsConverter_ApplicationExample.ViewModels
         {
             get => selectedCurrency;
             set => SetProperty(ref selectedCurrency, value);
+        }
+
+        public ConversionMode SelectedConversionMode
+        {
+            get => selectedConversionMode;
+            set => SetProperty(ref selectedConversionMode, value);
         }
 
         public LanguageToUse SelectedTestLanguage
@@ -74,20 +93,85 @@ namespace NumberToWordsConverter_ApplicationExample.ViewModels
         }
 
         public ICommand ConvertCommand { get; }
+        public ICommand ConvertPlainNumberCommand { get; }
+        public ICommand ConvertNegativeCommand { get; }
         public ICommand TestDollarsCommand { get; }
         public ICommand TestPesosCommand { get; }
         public ICommand RunAllTestsCommand { get; }
+        public ICommand TestPlainNumbersCommand { get; }
+        public ICommand TestNegativeAmountsCommand { get; }
 
         private void ConvertAmount()
         {
             Results = decimal.TryParse(InputNumber, out decimal amount)
-                ? ToWords(amount, SelectedLanguage, SelectedCurrency)
+                ? ToWords(amount, SelectedLanguage, SelectedConversionMode)
+                : "Invalid number format.";
+        }
+
+        private void ConvertPlainNumber()
+        {
+            Results = decimal.TryParse(InputNumber, out decimal amount)
+                ? ToWords(amount, SelectedLanguage, ConversionMode.PlainNumber)
+                : "Invalid number format.";
+        }
+
+        private void ConvertNegativeAmount()
+        {
+            Results = decimal.TryParse(InputNumber, out decimal amount)
+                ? ToWords(-Math.Abs(amount), SelectedLanguage, SelectedConversionMode)
                 : "Invalid number format.";
         }
 
         private void RunTests(CurrencyToUse currency)
         {
             AllTestResults = RunAutomatedTester(SelectedTestLanguage, currency);
+        }
+
+        private void TestPlainNumbers()
+        {
+            var testResults = new StringBuilder();
+            testResults.AppendLine("--- Testing Plain Numbers ---");
+            testResults.AppendLine();
+
+            var testNumbers = new decimal[] { 0m, 1m, 21m, 100m, 101m, 1000m, 21.5m, 100.25m, -1m, -21m, -100.5m };
+
+            foreach (var num in testNumbers)
+            {
+                string english = ToWords(num, LanguageToUse.English, ConversionMode.PlainNumber);
+                string spanish = ToWords(num, LanguageToUse.Spanish, ConversionMode.PlainNumber);
+
+                testResults.AppendLine($"{num,10} => EN: {english}");
+                testResults.AppendLine($"          => ES: {spanish}");
+                testResults.AppendLine();
+            }
+
+            AllTestResults = testResults.ToString();
+        }
+
+        private void TestNegativeAmounts()
+        {
+            var testResults = new StringBuilder();
+            testResults.AppendLine("--- Testing Negative Amounts ---");
+            testResults.AppendLine();
+
+            var testAmounts = new decimal[] { -1m, -21m, -100m, -101.50m, -1000m, -21.75m };
+
+            testResults.AppendLine("Dollars (English):");
+            foreach (var amount in testAmounts)
+            {
+                string result = ToWords(amount, LanguageToUse.English, ConversionMode.Currency_Dollar);
+                testResults.AppendLine($"{amount,10} => {result}");
+            }
+
+            testResults.AppendLine();
+            testResults.AppendLine("Pesos (Spanish):");
+            foreach (var amount in testAmounts)
+            {
+                string result = ToWords(amount, LanguageToUse.Spanish, ConversionMode.Currency_Peso);
+                testResults.AppendLine($"{amount,10} => {result}");
+            }
+
+            AllTestResults = testResults.ToString();
         }
 
         private void RunAllTests()

@@ -1,11 +1,12 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-namespace AmountToWordsLibrary_dotNET
+namespace NandoStyle.AmountToWords
 {
     /// <summary>
-    /// A static utility class for .NET 6.0 and higher, to convert decimal numbers into their currency word representation
-    /// for both English and Spanish. The class is self-contained and does not rely on external resources.
+    /// A static utility class for .NET 6.0 and higher, to convert decimal numbers into their word representation
+    /// for both English and Spanish. Supports currency (dollars, pesos) and plain number modes, including negative numbers.
+    /// The class is self-contained and does not rely on external resources.
     /// </summary>
     public static class AmountToWordConverter
     {
@@ -31,6 +32,36 @@ namespace AmountToWordsLibrary_dotNET
             Dollar,
             Peso
         }
+
+        public enum ConversionMode
+        {
+            Currency_Peso,
+            Currency_Dollar,
+            PlainNumber
+        }
+
+        /// <summary>
+        /// Converts a decimal number to its word representation using a specific language and conversion mode.
+        /// </summary>
+        /// <param name="number">The decimal number to convert to words.</param>
+        /// <param name="language">The target language for the conversion (e.g., English, Spanish).</param>
+        /// <param name="mode">The conversion mode (currency or plain number).</param>
+        /// <returns>A string containing the number expressed in words.</returns>
+        public static string ToWords(decimal number, LanguageToUse language, ConversionMode mode)
+        {
+            switch (language)
+            {
+                case LanguageToUse.Spanish:
+                    return ToWordsSpanish(number, mode);
+
+                case LanguageToUse.English:
+                    return ToWordsEnglish(number, mode);
+
+                default:
+                    throw new NotImplementedException($"Language '{language}' is not supported.");
+            }
+        }
+
         /// <summary>
         /// Converts a decimal number to its word representation using a specific language and currency.
         /// </summary>
@@ -40,17 +71,8 @@ namespace AmountToWordsLibrary_dotNET
         /// <returns>A string containing the number expressed in words.</returns>
         public static string ToWords(decimal number, LanguageToUse language, CurrencyToUse currency)
         {
-            switch (language)
-            {
-                case LanguageToUse.Spanish:
-                    return ToWordsSpanish(number, currency);
-
-                case LanguageToUse.English:
-                    return ToWordsEnglish(number, currency);
-
-                default:
-                    throw new NotImplementedException($"Language '{language}' is not supported.");
-            }
+            ConversionMode mode = currency == CurrencyToUse.Dollar ? ConversionMode.Currency_Dollar : ConversionMode.Currency_Peso;
+            return ToWords(number, language, mode);
         }
 
         #region Spanish Conversion Logic
@@ -207,6 +229,115 @@ namespace AmountToWordsLibrary_dotNET
             return result;
         }
 
+        private static string ToWordsSpanish(decimal number, ConversionMode mode)
+        {
+            try
+            {
+                bool isNegative = number < 0;
+                number = Math.Abs(number);
+
+                // Handle plain number mode (no currency)
+                if (mode == ConversionMode.PlainNumber)
+                {
+                    return ConvertPlainNumberSpanish(number, isNegative);
+                }
+
+                // Handle currency modes
+                string singularCurrency = mode == ConversionMode.Currency_Dollar ? "dólar" : "peso";
+                string pluralCurrency = mode == ConversionMode.Currency_Dollar ? "dólares" : "pesos";
+                string singularSubCurrency = "centavo";
+                string pluralSubCurrency = "centavos";
+
+                if (number == 0)
+                {
+                    return $"Cero {pluralCurrency}";
+                }
+
+                long wholePart = (long)Math.Truncate(number);
+                int decimalPart = (int)Math.Round((number - wholePart) * 100);
+
+                var sb = new StringBuilder();
+
+                if (isNegative)
+                {
+                    sb.Append("Negativo ");
+                }
+
+                if (wholePart > 0)
+                {
+                    string numberWords = ConvertNumberSpanish(wholePart);
+                    sb.Append(numberWords);
+
+                    // The preposition "de" is used with "millón/millones" when they are not followed by other numbers.
+                    if ((numberWords.EndsWith("millón") || numberWords.EndsWith("millones")) && wholePart % 1000000 == 0)
+                    {
+                        sb.Append(" de");
+                    }
+                    sb.Append(wholePart == 1 ? $" {singularCurrency}" : $" {pluralCurrency}");
+                }
+
+                if (decimalPart > 0)
+                {
+                    if (wholePart > 0) sb.Append(" con ");
+                    sb.Append(ConvertNumberSpanish(decimalPart));
+                    sb.Append(decimalPart == 1 ? $" {singularSubCurrency}" : $" {pluralSubCurrency}");
+                }
+
+                string result = sb.ToString().Trim();
+                if (result.Length > 0)
+                {
+                    return char.ToUpper(result[0]) + result.Substring(1);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Most likely you entered a too large number. Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+        private static string ConvertPlainNumberSpanish(decimal number, bool isNegative)
+        {
+            try
+            {
+                var sb = new StringBuilder();
+
+                if (isNegative)
+                {
+                    sb.Append("Negativo ");
+                }
+
+                if (number == 0)
+                {
+                    return "Cero";
+                }
+
+                long wholePart = (long)Math.Truncate(number);
+                int decimalPart = (int)Math.Round((number - wholePart) * 100);
+
+                sb.Append(ConvertNumberSpanish(wholePart));
+
+                if (decimalPart > 0)
+                {
+                    sb.Append(" coma ");
+                    sb.Append(ConvertNumberSpanish(decimalPart));
+                }
+
+                string result = sb.ToString().Trim();
+                if (result.Length > 0)
+                {
+                    return char.ToUpper(result[0]) + result.Substring(1);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error converting plain number in Spanish: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
         #endregion Spanish Conversion Logic
 
         #region English Conversion Logic
@@ -301,6 +432,108 @@ namespace AmountToWordsLibrary_dotNET
                 }
             }
             return words.ToString().Trim();
+        }
+
+        private static string ToWordsEnglish(decimal number, ConversionMode mode)
+        {
+            try
+            {
+                bool isNegative = number < 0;
+                number = Math.Abs(number);
+
+                // Handle plain number mode (no currency)
+                if (mode == ConversionMode.PlainNumber)
+                {
+                    return ConvertPlainNumberEnglish(number, isNegative);
+                }
+
+                // Handle currency modes
+                string singularCurrency = mode == ConversionMode.Currency_Dollar ? "dollar" : "peso";
+                string pluralCurrency = mode == ConversionMode.Currency_Dollar ? "dollars" : "pesos";
+                string singularSubCurrency = "cent";
+                string pluralSubCurrency = "cents";
+
+                if (number == 0)
+                {
+                    return $"Zero {pluralCurrency}";
+                }
+
+                long wholePart = (long)Math.Truncate(number);
+                int decimalPart = (int)Math.Round((number - wholePart) * 100);
+
+                var sb = new StringBuilder();
+
+                if (isNegative)
+                {
+                    sb.Append("Negative ");
+                }
+
+                if (wholePart > 0)
+                {
+                    sb.Append(ConvertNumberEnglish(wholePart));
+                    sb.Append(wholePart == 1 ? $" {singularCurrency}" : $" {pluralCurrency}");
+                }
+
+                if (decimalPart > 0)
+                {
+                    if (wholePart > 0) sb.Append(" and ");
+                    sb.Append(ConvertNumberEnglish(decimalPart));
+                    sb.Append(decimalPart == 1 ? $" {singularSubCurrency}" : $" {pluralSubCurrency}");
+                }
+
+                string result = sb.ToString().Trim();
+                if (result.Length > 0)
+                {
+                    return char.ToUpper(result[0]) + result.Substring(1);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Most likely you entered a too large number. Error: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+        private static string ConvertPlainNumberEnglish(decimal number, bool isNegative)
+        {
+            try
+            {
+                var sb = new StringBuilder();
+
+                if (isNegative)
+                {
+                    sb.Append("Negative ");
+                }
+
+                if (number == 0)
+                {
+                    return "Zero";
+                }
+
+                long wholePart = (long)Math.Truncate(number);
+                int decimalPart = (int)Math.Round((number - wholePart) * 100);
+
+                sb.Append(ConvertNumberEnglish(wholePart));
+
+                if (decimalPart > 0)
+                {
+                    sb.Append(" point ");
+                    sb.Append(ConvertNumberEnglish(decimalPart));
+                }
+
+                string result = sb.ToString().Trim();
+                if (result.Length > 0)
+                {
+                    return char.ToUpper(result[0]) + result.Substring(1);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error converting plain number in English: " + ex.Message);
+                return string.Empty;
+            }
         }
 
         #endregion English Conversion Logic

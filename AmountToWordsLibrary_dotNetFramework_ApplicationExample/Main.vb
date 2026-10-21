@@ -1,4 +1,4 @@
-﻿Imports NandoStyle.NumberToWordConverter.AmountToWordConverter
+﻿Imports NandoStyle.AmountToWords.AmountToWordConverter
 
 Public Class Main
     Private Sub btnConvert_Click(sender As Object, e As EventArgs) Handles btnConvert.Click

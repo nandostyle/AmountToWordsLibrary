@@ -6,8 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:NumberToWordsConverter_ApplicationExample.ViewModels"
     Title="Amount to Words Converter Tester - .NET 6.0 or higher"
-    Width="1000"
-    Height="500"
+    Width="1100"
+    Height="600"
     mc:Ignorable="d">
     <Window.DataContext>
         <viewModels:MainWindowViewModel />
@@ -18,8 +18,10 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
+                <!--  First row: Input  -->
                 <StackPanel
                     Grid.Row="0"
                     HorizontalAlignment="Center"
@@ -36,6 +38,33 @@
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         Text="{Binding InputNumber, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <!--  Second row: Conversion Mode Selection  -->
+                <StackPanel
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Margin="5"
+                        VerticalAlignment="Center"
+                        FontWeight="Bold"
+                        Text="Conversion Mode:" />
+                    <ComboBox
+                        x:Name="ConversionModeComboBox"
+                        Width="180"
+                        Margin="5"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        DisplayMemberPath="DisplayName"
+                        ItemsSource="{Binding ConversionModes}"
+                        SelectedValue="{Binding SelectedConversionMode}"
+                        SelectedValuePath="Value" />
+                    <TextBlock
+                        Margin="5"
+                        VerticalAlignment="Center"
+                        FontWeight="Bold"
+                        Text="Language:" />
                     <ComboBox
                         x:Name="LanguageComboBox"
                         Width="120"
@@ -44,32 +73,51 @@
                         VerticalContentAlignment="Center"
                         ItemsSource="{Binding Languages}"
                         SelectedItem="{Binding SelectedLanguage}" />
-                    <ComboBox
-                        x:Name="CurrencyComboBox"
-                        Width="120"
-                        Margin="5"
-                        HorizontalContentAlignment="Center"
-                        DisplayMemberPath="DisplayName"
-                        ItemsSource="{Binding Currencies}"
-                        SelectedValue="{Binding SelectedCurrency}"
-                        SelectedValuePath="Value" />
+                </StackPanel>
+
+                <!--  Third row: Action buttons  -->
+                <StackPanel
+                    Grid.Row="2"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
                     <Button
-                        x:Name="TestsButton"
+                        x:Name="ConvertButton"
                         Margin="5"
                         Padding="10,5"
                         Background="#FF007ACC"
                         Command="{Binding ConvertCommand}"
-                        Content="Run Test"
+                        Content="Convert"
+                        FontWeight="Bold"
+                        Foreground="White" />
+                    <Button
+                        x:Name="ConvertPlainButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Background="#FF28A745"
+                        Command="{Binding ConvertPlainNumberCommand}"
+                        Content="Convert as Plain"
+                        FontWeight="Bold"
+                        Foreground="White" />
+                    <Button
+                        x:Name="ConvertNegativeButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Background="#FFDC3545"
+                        Command="{Binding ConvertNegativeCommand}"
+                        Content="Convert as Negative"
                         FontWeight="Bold"
                         Foreground="White" />
                 </StackPanel>
+
+                <!--  Fourth row: Results  -->
                 <TextBox
                     x:Name="ResultsTextBox"
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Height="Auto"
                     Margin="5"
+                    Padding="10"
                     HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
+                    VerticalContentAlignment="Top"
                     FontFamily="Consolas"
                     FontSize="14"
                     FontWeight="Bold"
@@ -85,13 +133,20 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
+                <!--  Currency Tests Row  -->
                 <StackPanel
                     Grid.Row="0"
                     HorizontalAlignment="Center"
                     Orientation="Horizontal">
+                    <TextBlock
+                        Margin="5"
+                        VerticalAlignment="Center"
+                        FontWeight="Bold"
+                        Text="Test Language:" />
                     <ComboBox
                         x:Name="AllTestsLanguageComboBox"
                         Width="120"
@@ -104,31 +159,64 @@
                         x:Name="TestDollarsButton"
                         Margin="5"
                         Padding="10,5"
+                        Background="#FF007ACC"
                         Command="{Binding TestDollarsCommand}"
-                        Content="Test with Dollars" />
+                        Content="Test Dollars"
+                        FontWeight="Bold"
+                        Foreground="White" />
                     <Button
                         x:Name="TestPesosButton"
                         Margin="5"
                         Padding="10,5"
+                        Background="#FF007ACC"
                         Command="{Binding TestPesosCommand}"
-                        Content="Test with Pesos" />
+                        Content="Test Pesos"
+                        FontWeight="Bold"
+                        Foreground="White" />
+                </StackPanel>
+
+                <!--  Plain Number & Negative Tests Row  -->
+                <StackPanel
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+                    <Button
+                        x:Name="TestPlainNumbersButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Background="#FF28A745"
+                        Command="{Binding TestPlainNumbersCommand}"
+                        Content="Test Plain Numbers"
+                        FontWeight="Bold"
+                        Foreground="White" />
+                    <Button
+                        x:Name="TestNegativeButton"
+                        Margin="5"
+                        Padding="10,5"
+                        Background="#FFDC3545"
+                        Command="{Binding TestNegativeAmountsCommand}"
+                        Content="Test Negative Amounts"
+                        FontWeight="Bold"
+                        Foreground="White" />
                     <Button
                         x:Name="RunAllTestsButton"
                         Margin="5"
                         Padding="10,5"
-                        Background="#FF007ACC"
+                        Background="#FF6F42C1"
                         Command="{Binding RunAllTestsCommand}"
                         Content="Run All Tests"
                         FontWeight="Bold"
                         Foreground="White" />
                 </StackPanel>
 
+                <!--  Results TextBox  -->
                 <TextBox
                     x:Name="AllTestResultsTextBox"
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Margin="5"
+                    Padding="10"
                     FontFamily="Consolas"
-                    FontSize="12"
+                    FontSize="11"
                     IsReadOnly="True"
                     Text="{Binding AllTestResults, Mode=OneWay}"
                     TextWrapping="Wrap"

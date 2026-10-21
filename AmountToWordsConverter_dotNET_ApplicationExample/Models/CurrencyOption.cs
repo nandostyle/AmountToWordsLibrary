@@ -1,4 +1,4 @@
-using static AmountToWordsLibrary_dotNET.AmountToWordConverter;
+using static NandoStyle.AmountToWords.AmountToWordConverter;
 
 namespace NumberToWordsConverter_ApplicationExample.Models
 {

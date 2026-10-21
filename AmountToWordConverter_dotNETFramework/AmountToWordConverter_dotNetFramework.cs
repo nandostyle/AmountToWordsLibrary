@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NandoStyle.NumberToWordConverter
+namespace NandoStyle.AmountToWords
 {
     /// <summary>
-    /// A static utility class for .NET 6.0 and higher, to convert decimal numbers into their currency word representation
-    /// for both English and Spanish. The class is self-contained and does not rely on external resources.
+    /// A static utility class for .NET Framework 4.7.2, to convert decimal numbers into their word representation
+    /// for both English and Spanish. Supports currency (dollars, pesos) and plain number modes, including negative numbers.
+    /// The class is self-contained and does not rely on external resources.
     /// </summary>
     public static class AmountToWordConverter
     {
@@ -31,8 +32,37 @@ namespace NandoStyle.NumberToWordConverter
             Dollar,
             Peso
         }
+        public enum ConversionMode
+        {
+            Currency_Peso,
+            Currency_Dollar,
+            PlainNumber
+        }
+        /// <summary>
+        /// Converts a decimal number to its word representation using a specific language and conversion mode.
+        /// </summary>
+        /// <param name="number">The decimal number to convert to words.</param>
+        /// <param name="language">The target language for the conversion (e.g., English, Spanish).</param>
+        /// <param name="mode">The conversion mode (currency or plain number).</param>
+        /// <returns>A string containing the number expressed in words.</returns>
+        public static string ToWords(decimal number, LanguageToUse language, ConversionMode mode)
+        {
+            switch (language)
+            {
+                case LanguageToUse.Spanish:
+                    return ToWordsSpanish(number, mode);
+
+                case LanguageToUse.English:
+                    return ToWordsEnglish(number, mode);
+
+                default:
+                    throw new NotImplementedException($"Language '{language}' is not supported.");
+            }
+        }
+
         /// <summary>
         /// Converts a decimal number to its word representation using a specific language and currency.
+        /// This method is maintained for backward compatibility.
         /// </summary>
         /// <param name="number">The decimal number to convert to words.</param>
         /// <param name="language">The target language for the conversion (e.g., English, Spanish).</param>
@@ -40,37 +70,29 @@ namespace NandoStyle.NumberToWordConverter
         /// <returns>A string containing the number expressed in words.</returns>
         public static string ToWords(decimal number, LanguageToUse language, CurrencyToUse currency)
         {
-            switch (language)
-            {
-                case LanguageToUse.Spanish:
-                    return ToWordsSpanish(number, currency);
-
-                case LanguageToUse.English:
-                    return ToWordsEnglish(number, currency);
-
-                default:
-                    throw new NotImplementedException($"Language '{language}' is not supported.");
-            }
+            ConversionMode mode = currency == CurrencyToUse.Dollar ? ConversionMode.Currency_Dollar : ConversionMode.Currency_Peso;
+            return ToWords(number, language, mode);
         }
 
         #region Spanish Conversion Logic
-
-        private static string ToWordsSpanish(decimal number, CurrencyToUse currencyToUse)
+        private static string ToWordsSpanish(decimal number, ConversionMode mode)
         {
             try
             {
-                string singularCurrency = "peso";
-                string pluralCurrency = "pesos";
+                bool isNegative = number < 0;
+                number = Math.Abs(number);
+
+                // Handle plain number mode (no currency)
+                if (mode == ConversionMode.PlainNumber)
+                {
+                    return ConvertPlainNumberSpanish(number, isNegative);
+                }
+
+                // Handle currency modes
+                string singularCurrency = mode == ConversionMode.Currency_Dollar ? "dólar" : "peso";
+                string pluralCurrency = mode == ConversionMode.Currency_Dollar ? "dólares" : "pesos";
                 string singularSubCurrency = "centavo";
                 string pluralSubCurrency = "centavos";
-
-                if (currencyToUse == CurrencyToUse.Dollar)
-                {
-                    singularCurrency = "dólar";
-                    pluralCurrency = "dólares";
-                    singularSubCurrency = "centavo";
-                    pluralSubCurrency = "centavos";
-                }
 
                 if (number == 0)
                 {
@@ -103,13 +125,112 @@ namespace NandoStyle.NumberToWordConverter
                 }
 
                 string result = sb.ToString().Trim();
-                return char.ToUpper(result[0]) + result.Substring(1);
+                if (string.IsNullOrEmpty(result))
+                {
+                    return $"Cero {pluralCurrency}";
+                }
+                result = char.ToUpper(result[0]) + (result.Length > 1 ? result.Substring(1) : string.Empty);
+
+                if (isNegative)
+                {
+                    result = $"Negativo {result}";
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Most likely you entered a too large number. Error: " + ex.Message);
                 return string.Empty;
             }
+        }
+
+        private static string ConvertPlainNumberSpanish(decimal number, bool isNegative)
+        {
+            try
+            {
+                if (number == 0)
+                {
+                    return "Cero";
+                }
+
+                long wholePart = (long)Math.Truncate(number);
+                decimal decimalPart = number - wholePart;
+
+                var sb = new StringBuilder();
+
+                if (wholePart > 0)
+                {
+                    string numberWords = ConvertNumberSpanish(wholePart);
+                    if (!string.IsNullOrEmpty(numberWords))
+                    {
+                        sb.Append(numberWords);
+                    }
+                }
+
+                if (decimalPart > 0 && decimalPart < 1)
+                {
+                    if (wholePart > 0) sb.Append(" coma ");
+
+                    // Convert decimal part to words
+                    string decimalWords = ConvertDecimalPartSpanish(decimalPart);
+                    sb.Append(decimalWords);
+                }
+
+                string result = sb.ToString().Trim();
+                if (string.IsNullOrEmpty(result))
+                {
+                    return "Cero";
+                }
+                result = char.ToUpper(result[0]) + (result.Length > 1 ? result.Substring(1) : string.Empty);
+
+                if (isNegative)
+                {
+                    result = $"Negativo {result}";
+                }
+
+                return result;
+            }
+            catch
+            {
+                return isNegative ? "Negativo Cero" : "Cero";
+            }
+        }
+
+        private static string ConvertDecimalPartSpanish(decimal decimalPart)
+        {
+            try
+            {
+                // Convert decimal to integer by multiplying by a large power of 10
+                // For example: 0.25 becomes 25, 0.125 becomes 125, 0.5 becomes 5
+                string decimalStr = decimalPart.ToString("F10").TrimEnd('0');
+
+                if (decimalStr.Length <= 2 || decimalStr[0] != '0' || decimalStr[1] != '.')
+                {
+                    return "cero";
+                }
+
+                decimalStr = decimalStr.Substring(2);
+
+                if (string.IsNullOrEmpty(decimalStr))
+                    return "cero";
+
+                if (!long.TryParse(decimalStr, out long decimalNumber))
+                    return "cero";
+
+                return ConvertNumberSpanish(decimalNumber);
+            }
+            catch
+            {
+                return "cero";
+            }
+
+        }
+
+        private static string ToWordsSpanish(decimal number, CurrencyToUse currencyToUse)
+        {
+            ConversionMode mode = currencyToUse == CurrencyToUse.Dollar ? ConversionMode.Currency_Dollar : ConversionMode.Currency_Peso;
+            return ToWordsSpanish(number, mode);
         }
 
         private static string ConvertNumberSpanish(long number)
@@ -166,7 +287,7 @@ namespace NandoStyle.NumberToWordConverter
             long hundreds = number / 100;
             long tensAndOnes = number % 100;
 
-            if (hundreds > 0)
+            if (hundreds > 0 && hundreds < es_Hundreds.Length)
             {
                 sb.Append(es_Hundreds[hundreds]);
             }
@@ -176,14 +297,20 @@ namespace NandoStyle.NumberToWordConverter
                 if (hundreds > 0) sb.Append(" ");
                 if (tensAndOnes < 30)
                 {
-                    sb.Append(es_Ones[tensAndOnes]);
+                    if (tensAndOnes < es_Ones.Length)
+                    {
+                        sb.Append(es_Ones[tensAndOnes]);
+                    }
                 }
                 else
                 {
                     long tens = tensAndOnes / 10;
                     long ones = tensAndOnes % 10;
-                    sb.Append(es_Tens[tens]);
-                    if (ones > 0)
+                    if (tens < es_Tens.Length)
+                    {
+                        sb.Append(es_Tens[tens]);
+                    }
+                    if (ones > 0 && ones < es_Ones.Length)
                     {
                         sb.Append($" y {es_Ones[ones]}");
                     }
@@ -211,22 +338,24 @@ namespace NandoStyle.NumberToWordConverter
 
         #region English Conversion Logic
 
-        private static string ToWordsEnglish(decimal number, CurrencyToUse currencyToUse)
+        private static string ToWordsEnglish(decimal number, ConversionMode mode)
         {
             try
             {
-                string singularCurrency = "dollar";
-                string pluralCurrency = "dollars";
+                bool isNegative = number < 0;
+                number = Math.Abs(number);
+
+                // Handle plain number mode (no currency)
+                if (mode == ConversionMode.PlainNumber)
+                {
+                    return ConvertPlainNumberEnglish(number, isNegative);
+                }
+
+                // Handle currency modes
+                string singularCurrency = mode == ConversionMode.Currency_Dollar ? "dollar" : "peso";
+                string pluralCurrency = mode == ConversionMode.Currency_Dollar ? "dollars" : "pesos";
                 string singularSubCurrency = "cent";
                 string pluralSubCurrency = "cents";
-
-                if (currencyToUse == CurrencyToUse.Peso)
-                {
-                    singularCurrency = "peso";
-                    pluralCurrency = "pesos";
-                    singularSubCurrency = "cent";
-                    pluralSubCurrency = "cents";
-                }
 
                 if (number == 0)
                 {
@@ -252,13 +381,111 @@ namespace NandoStyle.NumberToWordConverter
                 }
 
                 string result = sb.ToString().Trim();
-                return char.ToUpper(result[0]) + result.Substring(1);
+                if (string.IsNullOrEmpty(result))
+                {
+                    return string.Format("Zero {0}", pluralCurrency);
+                }
+                result = char.ToUpper(result[0]) + (result.Length > 1 ? result.Substring(1) : string.Empty);
+
+                if (isNegative)
+                {
+                    result = $"Negative {result}";
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Most likely you entered a too large number. Error: " + ex.Message);
                 return string.Empty;
             }
+        }
+
+        private static string ConvertPlainNumberEnglish(decimal number, bool isNegative)
+        {
+            try
+            {
+                if (number == 0)
+                {
+                    return "Zero";
+                }
+
+                long wholePart = (long)Math.Truncate(number);
+                decimal decimalPart = number - wholePart;
+
+                var sb = new StringBuilder();
+
+                if (wholePart > 0)
+                {
+                    string numberWords = ConvertNumberEnglish(wholePart);
+                    if (!string.IsNullOrEmpty(numberWords))
+                    {
+                        sb.Append(numberWords);
+                    }
+                }
+
+                if (decimalPart > 0 && decimalPart < 1)
+                {
+                    if (wholePart > 0) sb.Append(" point ");
+
+                    // Convert decimal part to words
+                    string decimalWords = ConvertDecimalPartEnglish(decimalPart);
+                    sb.Append(decimalWords);
+                }
+
+                string result = sb.ToString().Trim();
+                if (string.IsNullOrEmpty(result))
+                {
+                    return "Zero";
+                }
+                result = char.ToUpper(result[0]) + (result.Length > 1 ? result.Substring(1) : string.Empty);
+
+                if (isNegative)
+                {
+                    result = $"Negative {result}";
+                }
+
+                return result;
+            }
+            catch
+            {
+                return isNegative ? "Negative Zero" : "Zero";
+            }
+        }
+
+        private static string ConvertDecimalPartEnglish(decimal decimalPart)
+        {
+            // Convert decimal to integer by multiplying by a large power of 10
+            // For example: 0.25 becomes 25, 0.125 becomes 125, 0.5 becomes 5
+            try
+            {
+                string decimalStr = decimalPart.ToString("F10").TrimEnd('0');
+
+                if (decimalStr.Length <= 2 || decimalStr[0] != '0' || decimalStr[1] != '.')
+                {
+                    return "zero";
+                }
+
+                decimalStr = decimalStr.Substring(2);
+
+                if (string.IsNullOrEmpty(decimalStr))
+                    return "zero";
+
+                if (!long.TryParse(decimalStr, out long decimalNumber))
+                    return "zero";
+
+                return ConvertNumberEnglish(decimalNumber);
+            }
+            catch
+            {
+                return "zero";
+            }
+        }
+
+        private static string ToWordsEnglish(decimal number, CurrencyToUse currencyToUse)
+        {
+            ConversionMode mode = currencyToUse == CurrencyToUse.Dollar ? ConversionMode.Currency_Dollar : ConversionMode.Currency_Peso;
+            return ToWordsEnglish(number, mode);
         }
 
         private static string ConvertNumberEnglish(long number)
@@ -332,7 +559,11 @@ namespace NandoStyle.NumberToWordConverter
                                 { 1151021.21m, "Un millón ciento cincuenta y un mil veintiún pesos con veintiún centavos" },
                                 { 1000005150.79m, "Mil millones cinco mil ciento cincuenta pesos con setenta y nueve centavos" },
                                 { 1234567890.50m, "Mil doscientos treinta y cuatro millones quinientos sesenta y siete mil ochocientos noventa pesos con cincuenta centavos" },
-                                { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil pesos con dos centavos" }
+                                { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil pesos con dos centavos" },
+                                { -1.00m, "Negativo Un peso" },
+                                { -21.00m, "Negativo Veintiún pesos" },
+                                { -100.00m, "Negativo Cien pesos" },
+                                { -101.50m, "Negativo Ciento un pesos con cincuenta centavos" }
                             }
                         },
                         {
@@ -351,7 +582,11 @@ namespace NandoStyle.NumberToWordConverter
                                 { 1151021.21m, "Un millón ciento cincuenta y un mil veintiún dólares con veintiún centavos" },
                                 { 1000005150.79m, "Mil millones cinco mil ciento cincuenta dólares con setenta y nueve centavos" },
                                 { 1234567890.50m, "Mil doscientos treinta y cuatro millones quinientos sesenta y siete mil ochocientos noventa dólares con cincuenta centavos" },
-                                { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil dólares con dos centavos" }
+                                { 330015551000.02m, "Trescientos treinta mil quince millones quinientos cincuenta y un mil dólares con dos centavos" },
+                                { -1.00m, "Negativo Un dólar" },
+                                { -21.00m, "Negativo Veintiún dólares" },
+                                { -100.00m, "Negativo Cien dólares" },
+                                { -101.50m, "Negativo Ciento un dólares con cincuenta centavos" }
                             }
                         }
                     }
@@ -374,7 +609,11 @@ namespace NandoStyle.NumberToWordConverter
                                 { 1151021.21m, "One million one hundred and fifty-one thousand and twenty-one dollars and twenty-one cents" },
                                 { 1000005150.79m , "One billion five thousand one hundred and fifty dollars and seventy-nine cents" },
                                 { 1234567890.50m, "One billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety dollars and fifty cents" },
-                                { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand dollars and two cents" }
+                                { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand dollars and two cents" },
+                                { -1.00m, "Negative One dollar" },
+                                { -21.00m, "Negative Twenty-one dollars" },
+                                { -100.00m, "Negative One hundred dollars" },
+                                { -101.50m, "Negative One hundred and one dollars and fifty cents" }
                             }
                         },
                         {
@@ -392,11 +631,54 @@ namespace NandoStyle.NumberToWordConverter
                                 { 1151021.21m, "One million one hundred and fifty-one thousand and twenty-one pesos and twenty-one cents" },
                                 { 1000005150.79m , "One billion five thousand one hundred and fifty pesos and seventy-nine cents" },
                                 { 1234567890.50m, "One billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety pesos and fifty cents" },
-                                { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand pesos and two cents" }
+                                { 330015551000.02m, "Three hundred and thirty billion fifteen million five hundred and fifty-one thousand pesos and two cents" },
+                                { -1.00m, "Negative One peso" },
+                                { -21.00m, "Negative Twenty-one pesos" },
+                                { -100.00m, "Negative One hundred pesos" },
+                                { -101.50m, "Negative One hundred and one pesos and fifty cents" }
                             }
                         }
                     }
                 }
+        };
+
+        private static readonly Dictionary<LanguageToUse, Dictionary<decimal, string>> PlainNumberTestCases =
+        new Dictionary<LanguageToUse, Dictionary<decimal, string>>
+        {
+            {
+                LanguageToUse.Spanish, new Dictionary<decimal, string>
+                {
+                    { 0m, "Cero" },
+                    { 1m, "Uno" },
+                    { 21m, "Veintiuno" },
+                    { 100m, "Cien" },
+                    { 101m, "Ciento uno" },
+                    { 1000m, "Mil" },
+                    { 21.5m, "Veintiuno coma cinco" },
+                    { 100.25m, "Cien coma veinticinco" },
+                    { 1000.125m, "Mil coma ciento veinticinco" },
+                    { -1m, "Negativo Uno" },
+                    { -21m, "Negativo Veintiuno" },
+                    { -100.5m, "Negativo Cien coma cinco" }
+                }
+            },
+            {
+                LanguageToUse.English, new Dictionary<decimal, string>
+                {
+                    { 0m, "Zero" },
+                    { 1m, "One" },
+                    { 21m, "Twenty-one" },
+                    { 100m, "One hundred" },
+                    { 101m, "One hundred and one" },
+                    { 1000m, "One thousand" },
+                    { 21.5m, "Twenty-one point five" },
+                    { 100.25m, "One hundred point twenty-five" },
+                    { 1000.125m, "One thousand point one hundred and twenty-five" },
+                    { -1m, "Negative One" },
+                    { -21m, "Negative Twenty-one" },
+                    { -100.5m, "Negative One hundred point five" }
+                }
+            }
         };
 
         // Main function to run automated tests for a specific language and currency combination.

@@ -4,14 +4,23 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>1.0.0.3</AssemblyVersion>
-    <FileVersion>1.0.0.3</FileVersion>
-    <Title>Amount toWords Converter</Title>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Title>Amount to Words Converter</Title>
+    <PackageId>NandoStyle.AmountToWords</PackageId>
+    <Version>1.1.0.0</Version>
+    <Authors>Fernando J. Garcia</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>A self-contained C#/.NET 6 (Compatible with more modern .NET versions) class library designed for easy integration into any .NET application, including those using VB.NET. It converts an amount (represented by two decimal numbers) into its word representation, handling multiple languages and currency formats.</Description>
+    <Description>A self-contained C#/.NET 6+ class library designed for easy integration into any .NET application. It converts decimal numbers into their word representation, handling multiple languages (English, Spanish) and currency formats (USD, MXN). Features include negative number support, plain number conversion mode, and ConversionMode enum for flexible conversion options.</Description>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <Version>1.0.0.3</Version>
+    <ProjectUrl>https://github.com/nandostyle/AmountToWordsLibrary</ProjectUrl>
+    <RepositoryUrl>https://github.com/nandostyle/AmountToWordsLibrary</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>amount;words;numbers;currency;conversion;spanish;english;i18n;localization</PackageTags>
+    <PackageReleaseNotes>v1.1.0.0 - Added ConversionMode enum for currency and plain number modes. Added support for negative numbers with language-specific prefixes. Added plain number conversion with decimal point/comma representation based on language.</PackageReleaseNotes>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>

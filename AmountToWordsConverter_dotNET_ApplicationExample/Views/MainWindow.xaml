@@ -1,13 +1,17 @@
 ﻿<Window
-    x:Class="NumberToWordsConverter_ApplicationExample.MainWindow"
+    x:Class="NumberToWordsConverter_ApplicationExample.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:NumberToWordsConverter_ApplicationExample.ViewModels"
     Title="Amount to Words Converter Tester - .NET 6.0 or higher"
-    Width="800"
+    Width="1000"
     Height="500"
     mc:Ignorable="d">
+    <Window.DataContext>
+        <viewModels:MainWindowViewModel />
+    </Window.DataContext>
     <TabControl Margin="10" Padding="3">
         <TabItem Header="Amount to Words Converter">
             <Grid Margin="10">
@@ -31,32 +35,30 @@
                         Margin="5"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
-                        Text="12345.67" />
+                        Text="{Binding InputNumber, UpdateSourceTrigger=PropertyChanged}" />
                     <ComboBox
                         x:Name="LanguageComboBox"
                         Width="120"
                         Margin="5"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
-                        SelectedIndex="0">
-                        <ComboBoxItem Content="English" />
-                        <ComboBoxItem Content="Spanish" />
-                    </ComboBox>
+                        ItemsSource="{Binding Languages}"
+                        SelectedItem="{Binding SelectedLanguage}" />
                     <ComboBox
                         x:Name="CurrencyComboBox"
                         Width="120"
                         Margin="5"
                         HorizontalContentAlignment="Center"
-                        SelectedIndex="0">
-                        <ComboBoxItem Content="Dollars" />
-                        <ComboBoxItem Content="Pesos" />
-                    </ComboBox>
+                        DisplayMemberPath="DisplayName"
+                        ItemsSource="{Binding Currencies}"
+                        SelectedValue="{Binding SelectedCurrency}"
+                        SelectedValuePath="Value" />
                     <Button
                         x:Name="TestsButton"
                         Margin="5"
                         Padding="10,5"
                         Background="#FF007ACC"
-                        Click="TestsButton_Click"
+                        Command="{Binding ConvertCommand}"
                         Content="Run Test"
                         FontWeight="Bold"
                         Foreground="White" />
@@ -72,6 +74,7 @@
                     FontSize="14"
                     FontWeight="Bold"
                     IsReadOnly="True"
+                    Text="{Binding Results, Mode=OneWay}"
                     TextWrapping="Wrap"
                     VerticalScrollBarVisibility="Auto" />
 
@@ -95,28 +98,26 @@
                         Margin="5"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
-                        SelectedIndex="0">
-                        <ComboBoxItem Content="English" />
-                        <ComboBoxItem Content="Spanish" />
-                    </ComboBox>
+                        ItemsSource="{Binding Languages}"
+                        SelectedItem="{Binding SelectedTestLanguage}" />
                     <Button
                         x:Name="TestDollarsButton"
                         Margin="5"
                         Padding="10,5"
-                        Click="TestDollarsButton_Click"
+                        Command="{Binding TestDollarsCommand}"
                         Content="Test with Dollars" />
                     <Button
                         x:Name="TestPesosButton"
                         Margin="5"
                         Padding="10,5"
-                        Click="TestPesosButton_Click"
+                        Command="{Binding TestPesosCommand}"
                         Content="Test with Pesos" />
                     <Button
                         x:Name="RunAllTestsButton"
                         Margin="5"
                         Padding="10,5"
                         Background="#FF007ACC"
-                        Click="RunAllTestsButton_Click"
+                        Command="{Binding RunAllTestsCommand}"
                         Content="Run All Tests"
                         FontWeight="Bold"
                         Foreground="White" />
@@ -129,6 +130,7 @@
                     FontFamily="Consolas"
                     FontSize="12"
                     IsReadOnly="True"
+                    Text="{Binding AllTestResults, Mode=OneWay}"
                     TextWrapping="Wrap"
                     VerticalScrollBarVisibility="Auto" />
             </Grid>

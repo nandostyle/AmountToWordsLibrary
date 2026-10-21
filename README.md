@@ -59,6 +59,19 @@ To use this converter in your .NET project, you should first compile it into a .
 
 ---
 
+### WPF Example (MVVM)
+
+`AmountToWordsConverter_dotNET_ApplicationExample` is a WPF application targeting .NET 9 for Windows. Open `AmountToWordsLibrary_dotNET\AmountToWordsLibrary.sln` in Visual Studio and set the WPF example as the startup project.
+
+* **Models**: `Models\CurrencyOption.cs` holds a currency's enum value and display label. The existing `AmountToWordsLibrary_dotNET` library remains the domain model for conversion and automated test reports without changes.
+* **Views**: `Views\MainWindow.xaml` defines the layout and binds its inputs, selections, results, and buttons to a `MainWindowViewModel` created in its `DataContext`. `Views\MainWindow.xaml.cs` only initializes the window. `App.xaml` stays at the application root and starts this view.
+* **ViewModels**: `ViewModels\MainWindowViewModel.cs` implements `INotifyPropertyChanged` and exposes conversion and test commands. The conversion language and test language remain independent; currency selections use enum values with the existing Dollars/Pesos labels.
+* **Commands**: `Commands\RelayCommand.cs` adapts view-model actions to WPF's `ICommand` without additional packages.
+
+The amount starts at
+
+---
+
 ### Contributing
 We welcome improvements and contributions! If you find a bug or have a suggestion for an improvement, feel free to open an issue or submit a pull request.
 
